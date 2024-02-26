@@ -874,7 +874,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 369396875}
         m_TargetAssemblyTypeName: Menu, Assembly-CSharp
-        m_MethodName: StartPR1_1
+        m_MethodName: StartDV1_2
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1023,7 +1023,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 369396875}
         m_TargetAssemblyTypeName: Menu, Assembly-CSharp
-        m_MethodName: StartDV1_2
+        m_MethodName: StartPR1_1
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
