@@ -117,7 +117,10 @@ public class PathfindingList
     {
         records.Add(record);
         if (!minInitialized || record.costSoFar < minRecord.costSoFar)
+        {
+            minInitialized = true;
             minRecord = record;
+        }
     }
     public void Remove(NodeRecord record)
     {

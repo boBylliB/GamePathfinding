@@ -16,7 +16,7 @@ public class FollowPath : Seek
     public Path path;
 
     float predictionTime = 0.1f;
-    float currentParam = 0f;
+    public float currentParam = 0f;
 
     // Overrides Seek's target position with the targeted point on the path
     protected override Vector3 getTargetPosition(out bool valid)

@@ -1522,7 +1522,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   linearVelocity: {x: 0, y: 0, z: 0}
   angularVelocity: 0
-  maxSpeed: 4
+  maxSpeed: 6
   maxAngularVelocity: 80
   myTarget: {fileID: 0}
   start: {fileID: 894803498}

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class TrafficNode : Node
 {
+    public bool selectable = true;
     public float travelSpeed = 1f;
     public int dataPoints = 3;
     public float dataTimeout = 30f;

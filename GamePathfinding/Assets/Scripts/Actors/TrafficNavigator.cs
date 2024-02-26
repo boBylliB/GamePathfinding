@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class TrafficNavigator : Kinematic
 {
-    FollowPath myMoveType;
+    //FollowPath myMoveType;
+    Seek myMoveType;
     Separation mySeparateType;
     LookWhereGoing myRotateType;
 
@@ -19,7 +20,16 @@ public class TrafficNavigator : Kinematic
     public float pathOffset = 1f;
     public bool predictive = false;
 
+    public float endSelectDist = 10f;
+    public GameObject endMarkerPrefab;
+    private GameObject endMarker;
+
     public float sepThreshold = 1f;
+    public float friction = 1f;
+
+    public Material mat;
+    public Color startColor;
+    public Color endColor;
 
     private TrafficNode[] nodes;
     private TrafficNode start;
@@ -50,12 +60,10 @@ public class TrafficNavigator : Kinematic
                 startIndex = idx;
             }
         }
-        // Pick a random node to end at
-        endIndex = Random.Range(0, nodes.Length - 1); // Subtract one since we want to skip start
-        // Effectively skip start by adding one if we're above or at the start index
-        if (endIndex >= startIndex) ++endIndex;
-        goal = nodes[endIndex];
-        Debug.Log("Distance to start: " + Vector3.Distance(transform.position, start.transform.position) + " Distance to goal: " + Vector3.Distance(transform.position, goal.transform.position));
+
+        selectEndNode();
+
+        endMarker = Instantiate(endMarkerPrefab, goal.transform.position, Quaternion.identity);
 
         graph = new TrafficGraph();
         graph.generateGraph();
@@ -66,11 +74,14 @@ public class TrafficNavigator : Kinematic
         }
         path.createPathTarget(goal.transform.position);
 
-        myMoveType = new FollowPath();
+        //myMoveType = new FollowPath();
+        //myMoveType.character = this;
+        //myMoveType.path = path;
+        //myMoveType.pathOffset = pathOffset;
+        //myMoveType.predictive = predictive;
+        myMoveType = new Seek();
         myMoveType.character = this;
-        myMoveType.path = path;
-        myMoveType.pathOffset = pathOffset;
-        myMoveType.predictive = predictive;
+        myMoveType.target = foundPath[0].fromNode.gameObject;
 
         TrafficNavigator[] navigators = FindObjectsOfType<TrafficNavigator>();
         List<Kinematic> others = new List<Kinematic>();
@@ -81,19 +92,26 @@ public class TrafficNavigator : Kinematic
         mySeparateType.character = this;
         mySeparateType.targets = others;
         mySeparateType.threshold = sepThreshold;
-        mySeparateType.maxAcceleration = 3f;
+        mySeparateType.maxAcceleration = 1f;
 
         myRotateType = new LookWhereGoing();
         myRotateType.character = this;
         myRotateType.target = myTarget;
         myRotateType.maxAngularAcceleration = maxAngularAccel;
         myRotateType.maxRotation = maxRot;
+
+        Material copyOfMat = new Material(mat);
+        mat = copyOfMat;
+        GetComponent<Renderer>().material = mat;
     }
 
     // Update is called once per frame
     protected override void Update()
     {
         travelTimer += Time.deltaTime;
+        Debug.Log("PathTargetCount = " + path.pathTargets.Count + " pathIter = " + pathIter + " FoundPathCount = " + foundPath.Count + " name = " + name);
+        if (Vector3.Distance(transform.position, foundPath[0].fromNode.transform.position) < regenerateDist)
+            myMoveType.target = foundPath[0].toNode.gameObject;
         // Every time we get within the regenerate distance of our target node, update the travel time
         if (Vector3.Distance(transform.position, foundPath[pathIter].toNode.transform.position) < regenerateDist)
         {
@@ -101,6 +119,9 @@ public class TrafficNavigator : Kinematic
             foundPath[pathIter].toNode.GetComponent<TrafficNode>().addTime(foundPath[pathIter].fromNode, travelTimer);
             pathIter++;
             travelTimer = 0;
+
+            if (pathIter < foundPath.Count)
+                myMoveType.target = foundPath[pathIter].toNode.gameObject;
         }
 
         // If we've reached the end of the path, run the algorithm again, heading to a random node
@@ -110,12 +131,9 @@ public class TrafficNavigator : Kinematic
             // Start at our current goal
             startIndex = endIndex;
             start = nodes[startIndex];
-            // Pick a random node to end at
-            endIndex = Random.Range(0, nodes.Length - 1); // Subtract one since we want to skip start
-            // Effectively skip start by adding one if we're above or at the start index
-            if (endIndex >= startIndex) ++endIndex;
-            goal = nodes[endIndex];
-            Debug.Log("Distance to start: " + Vector3.Distance(transform.position, start.transform.position) + " Distance to goal: " + Vector3.Distance(transform.position, goal.transform.position));
+
+            selectEndNode();
+            endMarker.transform.position = goal.transform.position;
 
             // Update graph costs
             graph.updateCosts();
@@ -132,35 +150,37 @@ public class TrafficNavigator : Kinematic
 
             pathIter = 0;
             travelTimer = 0;
+
+            myMoveType.target = foundPath[0].fromNode.gameObject;
         }
 
+        //float param = myMoveType.currentParam % 1;
+        //mat.color = startColor * (1 - param) + endColor * param;
+
         steeringUpdate = new SteeringOutput();
-        steeringUpdate.linear = myMoveType.getSteering().linear + 20*mySeparateType.getSteering().linear;
+        // Experimental mode that uses the separate steering output to cause a slowdown
+        steeringUpdate.linear = myMoveType.getSteering().linear * (1 - Mathf.Min(mySeparateType.getSteering().linear.magnitude, 0.99f));// + 50*mySeparateType.getSteering().linear;
+        // Apply friction
+        steeringUpdate.linear -= linearVelocity * friction;
         steeringUpdate.angular = myRotateType.getSteering().angular;
         base.Update();
     }
 
-    private void selectNodes()
+    private void selectEndNode()
     {
-        // Start at the closest node
-        int startIdx = -1;
-        float minDist = float.MaxValue;
-        for (int idx = 0; idx < nodes.Length; idx++)
+        // Grab selectable nodes
+        List<TrafficNode> selectableNodes = new List<TrafficNode>();
+        foreach (TrafficNode node in nodes)
         {
-            TrafficNode node = nodes[idx];
-            float dist = Vector3.Distance(node.transform.position, transform.position);
-            if (dist < minDist)
-            {
-                minDist = dist;
-                start = node;
-                startIdx = idx;
-            }
+            if (node.selectable && node != start && Vector3.Distance(transform.position, node.transform.position) >= endSelectDist)
+                selectableNodes.Add(node);
         }
         // Pick a random node to end at
-        int randInt = Random.Range(0, nodes.Length - 1); // Subtract one since we want to skip start
-        // Effectively skip start by adding one if we're above or at the start index
-        if (randInt >= startIdx) ++randInt;
-        goal = nodes[randInt];
+        int randInt = Random.Range(0, selectableNodes.Count);
+        goal = selectableNodes[randInt];
+        for (int idx = 0; idx < nodes.Length; idx++)
+            if (goal == nodes[idx])
+                endIndex = idx;
         Debug.Log("Distance to start: " + Vector3.Distance(transform.position, start.transform.position) + " Distance to goal: " + Vector3.Distance(transform.position, goal.transform.position));
     }
 

@@ -17,6 +17,8 @@ public class Path : MonoBehaviour
 
     private float ClosestParamAlongLine(Vector3 point, Vector3 start, Vector3 end)
     {
+        if (Vector3.Distance(start, end) == 0)
+            Debug.LogError("Distance from start to end was 0! Name: " + name);
         return -Vector3.Dot(end - start, start - point) / Vector3.Dot(end - start, end - start);
     }
     private float DistanceToTarget(int idx, Vector3 position)
@@ -98,7 +100,8 @@ public class Path : MonoBehaviour
 
         // Use the parameter given to find the path targets to use
         int startIdx = Mathf.FloorToInt(param);
-        //Debug.Log("param = " + param + " startIdx = " + startIdx);
+        Debug.Log("param = " + param + " startIdx = " + startIdx + " First index = " + (startIdx - idxOffset) + " Second Index = " + (startIdx - idxOffset + 1) + " Count = " + pathTargets.Count + " name = " + name);
+
 
         // Use the path targets to create a line segment, for which the parameter can directly be used to find a point along that line segment
         Vector3 start = pathTargets[startIdx - idxOffset].transform.position;
