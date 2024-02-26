@@ -23,8 +23,7 @@ public class Graph
             foreach (Node toNode in fromNode.linkedNodes)
             {
                 Connection connection = new Connection();
-                // Very simple cost based on distance
-                connection.cost = Vector3.Distance(fromNode.transform.position, toNode.transform.position);
+                connection.cost = calculateCost(fromNode, toNode);
                 connection.toNode = toNode;
                 connection.fromNode = fromNode;
                 graph.Add(connection);
@@ -35,7 +34,13 @@ public class Graph
     public void updateCosts()
     {
         foreach (Connection connection in graph)
-            connection.cost = Vector3.Distance(connection.fromNode.transform.position, connection.toNode.transform.position);
+            connection.cost = calculateCost(connection.fromNode, connection.toNode);
+    }
+
+    protected virtual float calculateCost(Node fromNode, Node toNode)
+    {
+        // Default to a simple cost based on distance
+        return Vector3.Distance(fromNode.transform.position, toNode.transform.position);
     }
 }
 public class Connection

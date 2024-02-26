@@ -124,10 +124,16 @@ public class PathfindingList
         records.Remove(record);
         if (minRecord.node == record.node)
         {
-            // If the minimum record is removed, this is the only time we actually have to search the list for a minimum
-            List<NodeRecord> tempList = records;
-            tempList.Sort();
-            minRecord = tempList[0];
+            // If the minimum record is removed, we have to search through the list to find the new minimum
+            float minCost = float.MaxValue;
+            foreach (NodeRecord rec in records)
+            {
+                if (rec.costSoFar < minCost)
+                {
+                    minCost = rec.costSoFar;
+                    minRecord = rec;
+                }
+            }
         }
     }
     public NodeRecord Get(int index)
@@ -175,9 +181,7 @@ public class NodeRecord : IComparable<NodeRecord>
 
         // This is a standard implementation feature I couldn't find an explanation for
         if (other == null)
-        {
             return 1;
-        }
 
         // We want to sort lowest costsofar to highest, so:
         //   if our costsofar is lower than other, return a negative value
