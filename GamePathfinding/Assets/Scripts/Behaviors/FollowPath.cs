@@ -30,7 +30,7 @@ public class FollowPath : Seek
 
         // Offset it
         float targetParam = currentParam + pathOffset;
-        Debug.Log("currentParam = " + currentParam + " pathOffset = " + pathOffset + " targetParam = " + targetParam);
+        //Debug.Log("currentParam = " + currentParam + " pathOffset = " + pathOffset + " targetParam = " + targetParam);
 
         // Get the target position
         // Default to the predicted future position, to not change anything about our motion if the path doesn't exist

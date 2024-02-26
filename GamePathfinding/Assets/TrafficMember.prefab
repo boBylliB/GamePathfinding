@@ -110,12 +110,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   linearVelocity: {x: 0, y: 0, z: 0}
   angularVelocity: 0
-  maxSpeed: 3
+  maxSpeed: 6
   maxAngularVelocity: 80
   myTarget: {fileID: 0}
-  regenerateDist: 2
+  regenerateDist: 6
   maxAngularAccel: 1000
   maxRot: 80
   path: {fileID: 0}
-  pathOffset: 1
-  predictive: 1
+  pathOffset: 0.3
+  predictive: 0
+  sepThreshold: 2

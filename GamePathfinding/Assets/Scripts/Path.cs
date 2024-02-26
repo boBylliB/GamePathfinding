@@ -69,9 +69,9 @@ public class Path : MonoBehaviour
         // so we check the distances to the points on either side of the found closest point
         // and shift back one if the previous line segment is closer overall
         if (DistanceToTarget(searchIdx - 1, position) < DistanceToTarget(searchIdx + 1, position)) --searchIdx;
-        Debug.Log("lastParam = " + lastParam + " prevDist = " + prevDist + " nextDist = " + nextDist +
-                  "\nsearchIdx = " + searchIdx + " idxOffset = " + idxOffset + " Count = " + pathTargets.Count +
-                  " used indices = " + (searchIdx - idxOffset) + ", " + (searchIdx - idxOffset + 1));
+        //Debug.Log("lastParam = " + lastParam + " prevDist = " + prevDist + " nextDist = " + nextDist +
+        //          "\nsearchIdx = " + searchIdx + " idxOffset = " + idxOffset + " Count = " + pathTargets.Count +
+        //          " used indices = " + (searchIdx - idxOffset) + ", " + (searchIdx - idxOffset + 1));
 
         // Now, we just need to find the closest point along that line segment, and add it to the found index
         // In this case, since we're using it as a path parameter, we can actually directly use a parameter along the line,
@@ -83,7 +83,11 @@ public class Path : MonoBehaviour
     public Vector3 GetPosition(float param, Vector3 defaultPosition)
     {
         // If there are no path targets, return the given default position
-        if (pathTargets.Count == 0) return defaultPosition;
+        if (pathTargets.Count == 0)
+        {
+            Debug.LogWarning("Default position used!");
+            return defaultPosition;
+        }
         // If there is only 1 path target, return that position
         if (pathTargets.Count == 1) return pathTargets[0].transform.position;
 
@@ -94,7 +98,7 @@ public class Path : MonoBehaviour
 
         // Use the parameter given to find the path targets to use
         int startIdx = Mathf.FloorToInt(param);
-        Debug.Log("param = " + param + " startIdx = " + startIdx);
+        //Debug.Log("param = " + param + " startIdx = " + startIdx);
 
         // Use the path targets to create a line segment, for which the parameter can directly be used to find a point along that line segment
         Vector3 start = pathTargets[startIdx - idxOffset].transform.position;

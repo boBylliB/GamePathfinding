@@ -110,7 +110,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   linkedNodes: []
-  travelSpeed: 3
+  travelSpeed: 6
   dataPoints: 10
   dataTimeout: 3
   travelTimes: []
