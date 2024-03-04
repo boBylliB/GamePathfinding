@@ -15,6 +15,6 @@ EditorBuildSettings:
     path: Assets/Scenes/PR1_1.unity
     guid: a0f24eccd99c3084097e414d301b9575
   - enabled: 1
-    path: Assets/Scenes/DV1_2.unity
+    path: Assets/Scenes/NavMeshes.unity
     guid: 1b34d61a3c4af8a48942dc41b8bd2ebf
   m_configObjects: {}
